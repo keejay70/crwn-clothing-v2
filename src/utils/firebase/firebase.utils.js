@@ -5,6 +5,12 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from 'firebase/auth';
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc
+} from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAA8OFHuANf291-kqH2nc53682mWKpKG3A",
@@ -16,20 +22,39 @@ const firebaseConfig = {
   measurementId: "G-SZFNKLMJ70"
 };
 
-const app = initializeApp(firebaseConfig);
+const firebaseApp = initializeApp(firebaseConfig);
 // const analytics = getAnalytics(app);
 
-const provider = new GoogleAuthProvider();
+const googleProvider = new GoogleAuthProvider();
 
-provider.setCustomParameters({
+googleProvider.setCustomParameters({
   prompt: 'select_account',
 });
 
-export const createUserProfileDocument = async (userAuth, additionalData) => {
-  if (!userAuth) return;
-
-  console.log(userAuth);
-};
 
 export const auth = getAuth();
-export const signInWithGooglePopup = () => signInWithPopup(auth, provider);
+export const signInWithGooglePopup = () => signInWithPopup(auth, googleProvider);
+export const signInWithGoogleRedirect = () => signInWithRedirect(auth, googleProvider);
+
+export const db = getFirestore();
+
+export const createUserDocument = async (userAuth) => {
+  const userDocRef = doc(db, 'users', userAuth.uid);
+  const userSnapshot = await getDoc(userDocRef);
+
+  if(!userSnapshot.exists()) {
+    const { displayName, email } = userAuth;
+    const createdAt = new Date();
+
+    try {
+      await setDoc(userDocRef, {
+        displayName, email, createdAt
+      });
+    } catch(error) {
+      console.log(error.message);
+    }
+  }
+
+  return userDocRef;
+
+}
