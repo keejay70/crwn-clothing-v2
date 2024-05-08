@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import './sign-in-form.styles.scss';
 import FormInput from '../form-input-component/form-input.jsx';
 import Button from '../button-component/button.jsx';
@@ -7,8 +7,7 @@ import {
     signInWithGooglePopup,
     createUserDocumentFromAuth,
     signInWithEmailAndPasswordAuth
-  } from '../../utils/firebase/firebase.utils';
-import { UserContext } from '../../context/user.context.jsx';
+  } from '../../utils/firebase/firebase.utils'; 
 
 const defaultValue = {
     email: '',
@@ -18,25 +17,21 @@ const defaultValue = {
 const SignInForm = () => {
     const [ formValue, setFormValue ] = useState(defaultValue);
     const { email, password } = formValue;
-    const { setCurrentUser } = useContext(UserContext);
 
     const resetFormFields = () => {
         setFormValue(defaultValue);
     }
 
     const signInWithGoogle = async () => {
-        const { user } = await signInWithGooglePopup();
-        const userDocRef = await createUserDocumentFromAuth(user);
-        console.log(userDocRef);
+        await signInWithGooglePopup();
       };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
 
         try {
-            const { user } = await signInWithEmailAndPasswordAuth(email, password);
+            await signInWithEmailAndPasswordAuth(email, password);
             resetFormFields();
-            setCurrentUser(user);
         } catch (error)  {
             switch (error.code) {
                 case 'auth/invalid-email':
